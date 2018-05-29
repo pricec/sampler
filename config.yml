@@ -1,0 +1,5 @@
+items:
+- type: file
+  interval: 10s
+  path: /test
+  metric: gauge

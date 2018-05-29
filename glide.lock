@@ -1,8 +1,18 @@
 hash: fc6bee35c46aaac8d35b7707049353e01969a1b95dc7e2a5a9f87ec56b3e7daf
-updated: 2018-05-29T17:23:27.922918656-04:00
+updated: 2018-05-29T18:05:47.389066205-04:00
 imports:
 - name: github.com/go-yaml/yaml
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+- name: github.com/jawher/mow.cli
+  version: 2f22195f169da29d54624afd9eb83ada5c9e4ee9
+  subpackages:
+  - internal/container
+  - internal/flow
+  - internal/fsm
+  - internal/lexer
+  - internal/matcher
+  - internal/parser
+  - internal/values
 - name: golang.org/x/net
   version: dfa909b99c79129e1100513e5cd36307665e5723
   subpackages:
