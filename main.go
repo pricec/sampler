@@ -7,6 +7,8 @@ import(
 	"syscall"
 
 	"golang.org/x/net/context"
+
+	"github.com/go-yaml/yaml"
 )
 
 func sigHandler(
