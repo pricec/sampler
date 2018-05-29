@@ -1,5 +1,5 @@
 items:
 - type: file
-  interval: 10s
-  path: /test
+  interval: 10
+  path: /sys/class/net/ens3/statistics/rx_bytes
   metric: gauge
