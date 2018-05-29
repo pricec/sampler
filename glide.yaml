@@ -1,0 +1,5 @@
+package: github.com/pricec/sampler
+import:
+- package: golang.org/x/net
+  subpackages:
+  - context
