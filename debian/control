@@ -1,0 +1,11 @@
+Source: sampler
+Section: unknown
+Priority: optional
+Maintainer: Chris Price <chrisprice@rogers.com>
+Build-Depends: debhelper (>=10), dh-systemd, golang-1.8
+Standards-Version: 4.0.0
+
+Package: sampler
+Architecture: amd64
+Depends:
+Description: Sampler for sampling stats and sending to statsd

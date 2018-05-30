@@ -1,0 +1,11 @@
+[Unit]
+Description=Service to sample values to send to stats at regular intervals
+Wants=statsd.service
+After=statsd.service
+
+[Service]
+ExecStart=/opt/sampler/sampler /etc/sampler/config.yml
+ExecReload=/bin/kill -SIGHUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+purge()
+{
+    echo "Stopping sampler service"
+    systemctl stop sampler.service
+    systemctl disable sampler.service
+}
+
+case "$1" in
+    purge)
+        ;;
+    remove)
+        purge
+        ;;
+    *)
+        echo "prerm called with invalid argument '$1'"
+        exit 1
+        ;;
+esac
+
+exit 0
