@@ -40,7 +40,10 @@ func mainLoop(cfg *Config) {
 			fmt.Printf("Failed to read configuration: %v\n", err)
 			sigChan <- syscall.SIGTERM
 		} else {
-			startSamplers(ctx, cfg)
+			if err := startSamplers(ctx, cfg); err != nil {
+				fmt.Printf("Failed to start samplers: %v\n", err)
+				sigChan <- syscall.SIGTERM
+			}
 		}
 		<-ctx.Done()
 	}

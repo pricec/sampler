@@ -1,5 +1,8 @@
+statsd_host: 127.0.0.1
+statsd_port: 8125
 items:
-- type: file
+- name: net.ens3.rx_bytes
+  type: file
   interval: 10
   path: /sys/class/net/ens3/statistics/rx_bytes
   metric: gauge

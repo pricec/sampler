@@ -6,12 +6,15 @@ import (
 )
 
 type Config struct {
-	Path    string                      // Path to configuration file
-	Verbose bool                        // Verbose logging mode?
-	Items   []ConfigItem `yaml:"items"` // Items to sample
+	Path       string                            // Path to configuration file
+	Verbose    bool                              // Verbose logging mode?
+	StatsdHost string       `yaml:"statsd_host"` // Statsd host to send to
+	StatsdPort string       `yaml:"statsd_port"` // Statsd port to send to
+	Items      []ConfigItem `yaml:"items"`       // Items to sample
 }
 
 type ConfigItem struct {
+	Name     string `yaml:"name"`     // Name to send statistic as
 	Kind     string `yaml:"type"`     // Type of sample (file, command, etc)
 	Interval int    `yaml:"interval"` // Sampling interval
 	Path     string `yaml:"path"`     // Path to file or command to run, etc
