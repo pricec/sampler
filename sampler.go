@@ -12,8 +12,35 @@ import (
 )
 
 type Sample struct {
-	name  string
-	value int64
+	name   string
+	value  int64
+	metric string
+}
+
+func sendSample(
+	conn *net.Conn,
+	kind string,
+	name string,
+	value int64,
+) {
+	var extension string
+	switch (kind) {
+	case "counter":
+		extension = "c"
+	case "set":
+		extension = "s"
+	case "gauge":
+		extension = "g"
+	default:
+		fmt.Printf("Unrecognized metric type %v\n", kind)
+		return
+	}
+	stat := fmt.Sprintf("%v:%v|%v\n", name, value, extension)
+
+	if _, err := fmt.Fprintf(*conn, stat); err != nil {
+		fmt.Printf("Error sending '%v:%v' to statsd: %v", name, value, err)
+	}
+	
 }
 
 func startSampleSender(
@@ -33,19 +60,7 @@ func startSampleSender(
 				case <- ctx.Done():
 					return
 				case sample := <-sampleChan:
-					// TODO: Discriminate between types (item.Kind)
-					//       This assumes the type is a gauge
-					if _, err := fmt.Fprintf(
-						conn,
-						"%v:%v|g\n",
-						sample.name,
-						sample.value,
-					); err != nil {
-						fmt.Printf(
-							"Error sending '%v:%v' to statsd: %v",
-							sample.name, sample.value, err,
-						)
-					}
+					sendSample(&conn, sample.metric, sample.name, sample.value)
 				}
 			}
 		}()
@@ -53,7 +68,7 @@ func startSampleSender(
 	return sampleChan, err
 }
 
-func handleSample(item ConfigItem, data string, sampleChan chan<- Sample) {
+func handleSample(item *ConfigItem, data string, sampleChan chan<- Sample) {
 	val, err := strconv.ParseInt(strings.Trim(data, "\n"), 10, 64)
 	if err != nil {
 		fmt.Printf(
@@ -63,13 +78,21 @@ func handleSample(item ConfigItem, data string, sampleChan chan<- Sample) {
 		return
 	}
 
-	//fmt.Printf("Got sample for '%v': %v\n", item.Name, val)
-	sampleChan <- Sample{ name: item.Name, value: val }
+	// Adjust sample value if this is a delta counter
+	if item.Metric == "counter" && item.Delta {
+		val -= item.CurrentVal
+		item.CurrentVal += val
+	} else {
+		item.CurrentVal = val
+	}
+
+	//fmt.Printf("Got sample for '%v': %v\n",	item.Name, val)
+	sampleChan <- Sample{ name: item.Name, value: val, metric: item.Metric }
 }
 
 func fileSampler(
 	ctx context.Context,
-	item ConfigItem,
+	item *ConfigItem,
 	sampleChan chan<- Sample,
 ) {
 	for {
@@ -88,7 +111,7 @@ func fileSampler(
 
 func startSampler(
 	ctx context.Context,
-	item ConfigItem,
+	item *ConfigItem,
 	sampleChan chan<- Sample,
 ) {
 	switch item.Kind {
@@ -106,7 +129,7 @@ func startSamplers(ctx context.Context, cfg *Config) error {
 	sampleChan, err := startSampleSender(ctx, cfg)
 	if err == nil {
 		for _, item := range cfg.Items {
-			startSampler(ctx, item, sampleChan)
+			startSampler(ctx, &item, sampleChan)
 		}
 	}
 	return err

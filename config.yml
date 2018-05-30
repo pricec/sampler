@@ -3,6 +3,7 @@ statsd_port: 8125
 items:
 - name: net.ens3.rx_bytes
   type: file
-  interval: 10
+  interval: 1
   path: /sys/class/net/ens3/statistics/rx_bytes
-  metric: gauge
+  metric: counter
+  delta: true

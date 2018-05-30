@@ -14,11 +14,13 @@ type Config struct {
 }
 
 type ConfigItem struct {
-	Name     string `yaml:"name"`     // Name to send statistic as
-	Kind     string `yaml:"type"`     // Type of sample (file, command, etc)
-	Interval int    `yaml:"interval"` // Sampling interval
-	Path     string `yaml:"path"`     // Path to file or command to run, etc
-	Metric   string `yaml:"metric"`   // Type of metric
+	Name        string `yaml:"name"`     // Name to send statistic as
+	Kind        string `yaml:"type"`     // Type of sample (file, command, etc)
+	Interval    int    `yaml:"interval"` // Sampling interval
+	Path        string `yaml:"path"`     // Path to file or command to run, etc
+	Metric      string `yaml:"metric"`   // Type of metric
+	Delta       bool   `yaml:"delta"`    // Delta? (only applies to counter)
+	CurrentVal  int64                    // Current sample value
 }
 
 func populateConfig(cfg *Config) error {
