@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -35,12 +36,12 @@ func sendSample(
 		fmt.Printf("Unrecognized metric type %v\n", kind)
 		return
 	}
+
 	stat := fmt.Sprintf("%v:%v|%v\n", name, value, extension)
 
 	if _, err := fmt.Fprintf(*conn, stat); err != nil {
 		fmt.Printf("Error sending '%v:%v' to statsd: %v", name, value, err)
 	}
-	
 }
 
 func startSampleSender(
@@ -90,20 +91,31 @@ func handleSample(item *ConfigItem, data string, sampleChan chan<- Sample) {
 	sampleChan <- Sample{ name: item.Name, value: val, metric: item.Metric }
 }
 
-func fileSampler(
+func bashSampler(item *ConfigItem) (string, error) {
+	output, err := exec.Command("/bin/bash", "-c", item.Path).Output()
+	return string(output), err
+}
+
+func fileSampler(item *ConfigItem) (string, error) {
+	data, err := ioutil.ReadFile(item.Path)
+	return string(data), err
+}
+
+func sampler(
 	ctx context.Context,
 	item *ConfigItem,
 	sampleChan chan<- Sample,
+	sampleFunc func(*ConfigItem) (string, error),
 ) {
 	for {
 		select {
 		case <- ctx.Done():
 			return
 		case <- time.After(time.Second * time.Duration(item.Interval)):
-			if data, err := ioutil.ReadFile(item.Path); err != nil {
+			if sample, err := sampleFunc(item); err != nil {
 				fmt.Printf("Error reading '%v': %v\n", item.Path, err)
 			} else {
-				handleSample(item, string(data), sampleChan)
+				handleSample(item, sample, sampleChan)
 			}
 		}
 	}
@@ -111,25 +123,36 @@ func fileSampler(
 
 func startSampler(
 	ctx context.Context,
-	item *ConfigItem,
+	item ConfigItem,
 	sampleChan chan<- Sample,
 ) {
+	var sampleFunc func(*ConfigItem) (string, error)
 	switch item.Kind {
 	case "file":
-		go fileSampler(ctx, item, sampleChan)
+		sampleFunc = fileSampler
+	case "bash":
+		sampleFunc = bashSampler
 	default:
 		fmt.Printf(
 			"Failed to start sampler for '%v'. '%v' is an unrecognized type",
 			item.Kind, item.Name,
 		)
+		return
 	}
+
+	go sampler(ctx, &item, sampleChan, sampleFunc)
 }
 
 func startSamplers(ctx context.Context, cfg *Config) error {
 	sampleChan, err := startSampleSender(ctx, cfg)
 	if err == nil {
 		for _, item := range cfg.Items {
-			startSampler(ctx, &item, sampleChan)
+			// TODO: I want to pass in a pointer to startSampler, but
+			//       for some reason which I do not yet understand,
+			//       it can be changed after the fact. That is, every
+			//       sampler will sample the same item if I replace
+			//       'item' with '&item' below.
+			startSampler(ctx, item, sampleChan)
 		}
 	}
 	return err

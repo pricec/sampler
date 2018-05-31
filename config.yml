@@ -7,3 +7,21 @@ items:
   path: /sys/class/net/ens3/statistics/rx_bytes
   metric: counter
   delta: true
+- name: net.ens3.tx_bytes
+  type: file
+  interval: 1
+  path: /sys/class/net/ens3/statistics/tx_bytes
+  metric: counter
+  delta: true
+- name: memory.available
+  type: bash
+  interval: 10
+  path: 'cat /proc/meminfo | grep MemAvailable | sed -E "s/\s+/ /g" | cut -d" " -f2'
+  metric: gauge
+  delta: false
+- name: memory.free
+  type: bash
+  interval: 10
+  path: 'cat /proc/meminfo | grep MemFree | sed -E "s/\s+/ /g" | cut -d" " -f2'
+  metric: gauge
+  delta: false
