@@ -10,6 +10,7 @@ type Config struct {
 	Verbose    bool                              // Verbose logging mode?
 	StatsdHost string       `yaml:"statsd_host"` // Statsd host to send to
 	StatsdPort string       `yaml:"statsd_port"` // Statsd port to send to
+	Prefix     string       `yaml:"prefix"`      // Prefix for all stats
 	Items      []ConfigItem `yaml:"items"`       // Items to sample
 }
 

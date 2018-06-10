@@ -61,7 +61,12 @@ func startSampleSender(
 				case <- ctx.Done():
 					return
 				case sample := <-sampleChan:
-					sendSample(&conn, sample.metric, sample.name, sample.value)
+					sendSample(
+						&conn,
+						sample.metric,
+						cfg.Prefix + "." + sample.name,
+						sample.value,
+					)
 				}
 			}
 		}()
