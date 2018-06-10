@@ -81,8 +81,16 @@ func handleSample(item *ConfigItem, data string, sampleChan chan<- Sample) {
 
 	// Adjust sample value if this is a delta counter
 	if item.Metric == "counter" && item.Delta {
-		val -= item.CurrentVal
-		item.CurrentVal += val
+		// Don't send an update at all if this is the first sample
+		// (for delta, we need a history for the sample to make sense)
+		if !item.Initialized {
+			item.Initialized = true
+			item.CurrentVal = val
+			return
+		} else {
+			val -= item.CurrentVal
+			item.CurrentVal += val
+		}
 	} else {
 		item.CurrentVal = val
 	}

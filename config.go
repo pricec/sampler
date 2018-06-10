@@ -21,6 +21,7 @@ type ConfigItem struct {
 	Metric      string `yaml:"metric"`   // Type of metric
 	Delta       bool   `yaml:"delta"`    // Delta? (only applies to counter)
 	CurrentVal  int64                    // Current sample value
+	Initialized bool                     // Current value initialized?
 }
 
 func populateConfig(cfg *Config) error {
