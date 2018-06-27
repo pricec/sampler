@@ -1,2 +1,8 @@
 sampler
 build/
+debian/debhelper-build-stamp
+debian/sampler.debhelper.log
+debian/sampler.postinst.debhelper
+debian/sampler.postrm.debhelper
+debian/sampler.prerm.debhelper
+debian/sampler.substvars

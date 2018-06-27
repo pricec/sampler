@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"io/ioutil"
@@ -23,7 +23,7 @@ type ConfigItem struct {
 	Delta       bool   `yaml:"delta"`    // Delta? (only applies to counter)
 }
 
-func populateConfig(cfg *Config) error {
+func PopulateConfig(cfg *Config) error {
 	data, err := ioutil.ReadFile(cfg.Path)
 	if err == nil {
 		err = yaml.Unmarshal(data, cfg)

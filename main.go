@@ -7,8 +7,10 @@ import (
 	"syscall"
 
 	"golang.org/x/net/context"
-
 	"github.com/jawher/mow.cli"
+
+	"github.com/pricec/sampler/config"
+	"github.com/pricec/sampler/samplers"
 )
 
 func sigHandler(
@@ -27,7 +29,7 @@ func sigHandler(
 	}
 }
 
-func mainLoop(cfg *Config) {
+func mainLoop(cfg *config.Config) {
 	wantExit    := false
 	sigChan     := make(chan os.Signal)
 
@@ -36,16 +38,56 @@ func mainLoop(cfg *Config) {
 	for !wantExit {
 		ctx, cancel := context.WithCancel(context.Background())
 		go sigHandler(context.Background(), cancel, sigChan, &wantExit)
-		if err := populateConfig(cfg); err != nil {
+		if err := config.PopulateConfig(cfg); err != nil {
 			fmt.Printf("Failed to read configuration: %v\n", err)
 			sigChan <- syscall.SIGTERM
 		} else {
-			if err := startSamplers(ctx, cfg); err != nil {
-				fmt.Printf("Failed to start samplers: %v\n", err)
-				sigChan <- syscall.SIGTERM
+			var err error
+			var sampler samplers.Sampler
+
+			sender, err := samplers.NewSender(
+				ctx,
+				cfg.Prefix,
+				cfg.StatsdHost,
+				cfg.StatsdPort,
+			)
+			if err != nil {
+				fmt.Printf("Error start sender: %v\n", err)
+				os.Exit(1)
 			}
+
+			takers := make([]*samplers.SampleTaker, len(cfg.Items))
+			for i, item := range cfg.Items {
+				switch (item.Kind) {
+				case "file":
+					sampler, err = samplers.NewFileSampler(&item)
+				case "bash":
+					sampler, err = samplers.NewBashSampler(&item)
+				default:
+					fmt.Printf("Unrecognized sampler type '%v'\n", item.Kind)
+					continue
+				}
+
+				if err == nil {
+					takers[i], err = samplers.NewSampleTaker(
+						ctx,
+						&item,
+						sender,
+						sampler,
+					)
+				}
+
+				if err != nil {
+					fmt.Printf(
+						"Failed to start sample taker for %v: %v\n",
+						item.Name,
+						err,
+					)
+					os.Exit(1)
+				}
+			}
+			<-ctx.Done()
 		}
-		<-ctx.Done()
 	}
 }
 
@@ -60,7 +102,7 @@ func main() {
 	)
 
 	app.Action = func() {
-		cfg := Config{
+		cfg := config.Config{
 			Path:    *cfgFile,
 			Verbose: *verbose,
 		}

@@ -1,16 +1,29 @@
 statsd_host: 127.0.0.1
 statsd_port: 8125
+prefix: graphite
 items:
-- name: net.ens3.rx_bytes
+- name: net.enp30s0.rx_bytes
   type: file
   interval: 1
-  path: /sys/class/net/ens3/statistics/rx_bytes
+  path: /sys/class/net/enp30s0/statistics/rx_bytes
   metric: counter
   delta: true
-- name: net.ens3.tx_bytes
+- name: net.enp30s0.tx_bytes
   type: file
   interval: 1
-  path: /sys/class/net/ens3/statistics/tx_bytes
+  path: /sys/class/net/ensp30s0/statistics/tx_bytes
+  metric: counter
+  delta: true
+- name: net.enp36s0.rx_bytes
+  type: file
+  interval: 1
+  path: /sys/class/net/enp36s0/statistics/rx_bytes
+  metric: counter
+  delta: true
+- name: net.enp36s0.tx_bytes
+  type: file
+  interval: 1
+  path: /sys/class/net/ensp36s0/statistics/tx_bytes
   metric: counter
   delta: true
 - name: memory.available
@@ -25,3 +38,75 @@ items:
   path: 'cat /proc/meminfo | grep MemFree | sed -E "s/\s+/ /g" | cut -d" " -f2'
   metric: gauge
   delta: false
+- name: memory.used
+  type: bash
+  interval: 10
+  path: 'free | head -2 | tail -1 | sed -E "s/\s+/ /g" | cut -d" " -f3'
+  metric: gauge
+  delta: false
+- name: memory.total
+  type: bash
+  interval: 10
+  path: 'free | head -2 | tail -1 | sed -E "s/\s+/ /g" | cut -d" " -f2'
+  metric: gauge
+  delta: false
+- name: cpu.user
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f2'
+  metric: counter
+  delta: true
+- name: cpu.nice
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f3'
+  metric: counter
+  delta: true
+- name: cpu.system
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f4'
+  metric: counter
+  delta: true
+- name: cpu.idle
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f5'
+  metric: counter
+  delta: true
+- name: cpu.iowait
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f6'
+  metric: counter
+  delta: true
+- name: cpu.irq
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f7'
+  metric: counter
+  delta: true
+- name: cpu.softirq
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f8'
+  metric: counter
+  delta: true
+- name: cpu.steal
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f9'
+  metric: counter
+  delta: true
+- name: cpu.guest
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f10'
+  metric: counter
+  delta: true
+- name: cpu.guest_nice
+  type: bash
+  interval: 1
+  path: 'cat /proc/stat | grep cpu | head -1 | sed -E "s/\s+/ /g" | cut -d" " -f11'
+  metric: counter
+  delta: true
