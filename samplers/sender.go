@@ -74,7 +74,13 @@ func (s *Sender) sendSample(sample Sample) {
 		return
 	}
 
-	stat := fmt.Sprintf("%v:%v|%v\n", sample.name, sample.value, extension)
+	stat := sample.name
+
+	if sample.suffix != "" {
+		stat = fmt.Sprintf("%v.%v", stat, sample.suffix)
+	}
+
+	stat = fmt.Sprintf("%v:%v|%v\n", stat, sample.value, extension)
 
 	if s.prefix != "" {
 		stat = fmt.Sprintf("%v.%v", s.prefix, stat)

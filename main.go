@@ -63,6 +63,8 @@ func mainLoop(cfg *config.Config) {
 					sampler, err = samplers.NewFileSampler(&item)
 				case "bash":
 					sampler, err = samplers.NewBashSampler(&item)
+				case "cpu":
+					sampler, err = samplers.NewCpuSampler(&item)
 				default:
 					fmt.Printf("Unrecognized sampler type '%v'\n", item.Kind)
 					continue
