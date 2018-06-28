@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"os"
 	"github.com/go-yaml/yaml"
 )
 
@@ -28,5 +29,10 @@ func PopulateConfig(cfg *Config) error {
 	if err == nil {
 		err = yaml.Unmarshal(data, cfg)
 	}
+
+	if cfg.Prefix == "" {
+		cfg.Prefix, err = os.Hostname()
+	}
+
 	return err
 }
