@@ -3,10 +3,6 @@ package samplers
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -114,49 +110,5 @@ func (s *SampleTaker) adjust(field string, inVal int64) (int64, bool) {
 
 type Sampler interface {
 	Sample() (map[string]int64, error)
-}
-
-type FileSampler struct {
-	path string
-}
-
-func NewFileSampler(item *config.ConfigItem) (*FileSampler, error) {
-	return &FileSampler{ path: item.Path }, nil
-}
-
-func (s *FileSampler) Sample() (map[string]int64, error) {
-	data, err := ioutil.ReadFile(s.path)
-	if err != nil {
-		return nil, err
-	}
-
-	val, err := strconv.ParseInt(strings.Trim(string(data), "\n"), 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]int64{ "": val }, nil
-}
-
-type BashSampler struct {
-	command string
-}
-
-func NewBashSampler(item *config.ConfigItem) (*BashSampler, error) {
-	return &BashSampler{ command: item.Path }, nil
-}
-
-func (s *BashSampler) Sample() (map[string]int64, error) {
-	data, err := exec.Command("/bin/bash", "-c", s.command).Output()
-	if err != nil {
-		return nil, err
-	}
-
-	val, err := strconv.ParseInt(strings.Trim(string(data), "\n"), 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]int64{ "": val }, nil
 }
 
