@@ -67,6 +67,8 @@ func mainLoop(cfg *config.Config) {
 					sampler, err = samplers.NewCpuSampler(&item)
 				case "memory":
 					sampler, err = samplers.NewMemorySampler(&item)
+				case "uptime":
+					sampler, err = samplers.NewUptimeSampler(&item)
 				default:
 					fmt.Printf("Unrecognized sampler type '%v'\n", item.Kind)
 					continue

@@ -13,28 +13,9 @@ items:
   path: /sys/class/net/ens3/statistics/tx_bytes
   metric: counter
   delta: true
-- name: memory.available
-  type: bash
+- name: memory
+  type: memory
   interval: 10
-  path: 'cat /proc/meminfo | grep MemAvailable | sed -E "s/\s+/ /g" | cut -d" " -f2'
-  metric: gauge
-  delta: false
-- name: memory.free
-  type: bash
-  interval: 10
-  path: 'cat /proc/meminfo | grep MemFree | sed -E "s/\s+/ /g" | cut -d" " -f2'
-  metric: gauge
-  delta: false
-- name: memory.used
-  type: bash
-  interval: 10
-  path: 'free | head -2 | tail -1 | sed -E "s/\s+/ /g" | cut -d" " -f3'
-  metric: gauge
-  delta: false
-- name: memory.total
-  type: bash
-  interval: 10
-  path: 'free | head -2 | tail -1 | sed -E "s/\s+/ /g" | cut -d" " -f2'
   metric: gauge
   delta: false
 - name: cpu
@@ -43,3 +24,8 @@ items:
   path: cpu
   metric: counter
   delta: true
+- name: uptime
+  type: uptime
+  interval: 10
+  metric: gauge
+  delta: false
